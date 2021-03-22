@@ -7,7 +7,7 @@ root.title("ChemCalc")
 
 # Reagents frame
 reagents_frame = LabelFrame(root, text="Reactants (literature values)")
-reagents_frame.grid(row=0, column=0)
+reagents_frame.grid(row=0, column=0, columnspan=2)
 
 
 # Grid labels
@@ -93,7 +93,8 @@ class Compound:
         self.lit_conc_entry = Entry(reagents_frame, width=Compound.field_width, justify='center')
         self.lit_mol_entry = Entry(reagents_frame, width=Compound.field_width, justify='center')
 
-        # storing property entries in dictionary
+        # storing property entries in dictionary so they can be easily removed
+        # when required
         self.properties_entry = {"name" : self.name_entry,
                                 "role" : self.role_entry,
                                 "mr" : self.mr_entry,
@@ -104,30 +105,6 @@ class Compound:
                                 "lit_conc" : self.lit_conc_entry,
                                 "lit_mol" : self.lit_mol_entry,
                                 }
-
-        # Initialising property values (except drop-down menus)
-        self.name = None
-        self.mr = None
-        self.role = None
-        self.density = None
-        self.phase = None
-        self.lit_mass = None
-        self.lit_vol = None
-        self.lit_conc = None
-        self.lit_mol = None
-
-        # compound properites stored in a dictionary
-        self.properties = {"name" : self.name,
-                            "role" : self.role,
-                            "mr" : self.mr,
-                            "density" : self.density,
-                            "phase" : self.phase,
-                            "lit_mass" : self.lit_mass,
-                            "lit_vol" : self.lit_vol,
-                            "lit_conc" : self.lit_conc,
-                            "lit_mol" : self.lit_mol,
-                            }
-
 
 
     # Compound entry layout + name updater
@@ -146,7 +123,7 @@ class Compound:
             self.lit_conc_entry.grid(row=Compound.compound_list.index(self)+1, column=8)
             self.lit_mol_entry.grid(row=Compound.compound_list.index(self)+1, column=9)
 
-            # Position remove compound button
+            # Position 'remove compound' button
             self.remove_compound_button.grid(row=Compound.compound_list.index(self)+1, column = 0)
             # set compound button to "disabled" if it is the only compound entry
             if len(Compound.compound_list) < 2:
@@ -237,11 +214,63 @@ target_product_lit_yield_entry.grid(row=1, column=4)
 
 ##--------------- Below target compound frame -------------------------------##
 
-# TODO: Calculate button
-
 ##--------------- Calculation -----------------------------------------------##
 
-# TODO: Use pandas to perform calculations
+# Calculate button will set the input attributes of each compound and the target
+# product
+
+# Calculate button function
+def calculate():
+    # Setting attribute values as strings for each compound instance
+    for compound in Compound.compound_list:
+        compound.name = compound.properties_entry["name"].get()
+        compound.mr = compound.properties_entry["mr"].get()
+        if compound.properties_entry["role"].get() == 'Select Role':
+            compound.role = ''
+        compound.density = compound.properties_entry["density"].get()
+        if compound.properties_entry["phase"].get() == 'Select Phase':
+            compound.phase = ''
+        compound.lit_mass = compound.properties_entry["lit_mass"].get()
+        compound.lit_vol = compound.properties_entry["lit_vol"].get()
+        compound.lit_conc = compound.properties_entry["lit_conc"].get()
+        compound.lit_mol = compound.properties_entry["lit_mol"].get()
+
+        # Storing compound properites in a dictionary for easy access
+        compound.properties = {"name" : compound.name,
+                                "role" : compound.role,
+                                "mr" : compound.mr,
+                                "density" : compound.density,
+                                "phase" : compound.phase,
+                                "lit_mass" : compound.lit_mass,
+                                "lit_vol" : compound.lit_vol,
+                                "lit_conc" : compound.lit_conc,
+                                "lit_mol" : compound.lit_mol,
+                                }
+
+
+    target_properties = {"name" : target_compound_name_entry.get(),
+                            "mr" : target_mr_entry.get(),
+                            "phase" : target_phase_entry.get(),
+                            "desired_mass" : target_desired_mass_entry.get(),
+                            "lit_yield" : target_product_lit_yield_entry.get(),
+                            }
+
+    # Debugging print statements
+    for compound in Compound.compound_list:
+        print(compound.properties)
+    print(target_properties)
+
+    # Passing input data to calculator class.
+
+    # TODO: Create Calculator class to set up dataframe and perform conditional
+    # calculations
+    # results = Calculator(Compound.compound_list, target_properties):
+
+##--------------- Calculate button ------------------------------------------##
+
+# Calculate button declaration and position
+calculate_button = Button(root, text="Calculate", command=calculate)
+calculate_button.grid(sticky='W', row=4, column=1)
 
 ##--------------- Render output ---------------------------------------------##
 
