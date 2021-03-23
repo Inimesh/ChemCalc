@@ -1,6 +1,8 @@
 from tkinter import *
 from tkinter import ttk
 
+from cc_calc import Calculator
+
 ##--------------- Setting up main window ------------------------------------##
 root = Tk()
 root.title("ChemCalc")
@@ -221,15 +223,21 @@ target_product_lit_yield_entry.grid(row=1, column=4)
 
 # Calculate button function
 def calculate():
+    # Creating empty list to store compound property dictionaries
+    compound_properties_list = []
     # Setting attribute values as strings for each compound instance
     for compound in Compound.compound_list:
         compound.name = compound.properties_entry["name"].get()
         compound.mr = compound.properties_entry["mr"].get()
         if compound.properties_entry["role"].get() == 'Select Role':
             compound.role = ''
+        else:
+            compound.role = compound.properties_entry["role"].get()
         compound.density = compound.properties_entry["density"].get()
         if compound.properties_entry["phase"].get() == 'Select Phase':
             compound.phase = ''
+        else:
+            compound.phase = compound.properties_entry["phase"].get()
         compound.lit_mass = compound.properties_entry["lit_mass"].get()
         compound.lit_vol = compound.properties_entry["lit_vol"].get()
         compound.lit_conc = compound.properties_entry["lit_conc"].get()
@@ -247,7 +255,11 @@ def calculate():
                                 "lit_mol" : compound.lit_mol,
                                 }
 
+        # Storing dictionaries in a list to be passed to calculator
+        compound_properties_list.append(compound.properties)
 
+    # Storing compound properites in a dictionary for easy accesss. Will be
+    # passed to calculator.
     target_properties = {"name" : target_compound_name_entry.get(),
                             "mr" : target_mr_entry.get(),
                             "phase" : target_phase_entry.get(),
@@ -256,11 +268,13 @@ def calculate():
                             }
 
     # Debugging print statements
-    for compound in Compound.compound_list:
-        print(compound.properties)
-    print(target_properties)
+    # for compound in Compound.compound_list:
+    #     print(compound.properties)
+    # print(target_properties)
 
     # Passing input data to calculator class.
+    calculator = Calculator(compound_properties_list, target_properties)
+    print(calculator.table)
 
     # TODO: Create Calculator class to set up dataframe and perform conditional
     # calculations
