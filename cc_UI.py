@@ -14,28 +14,28 @@ reagents_frame.grid(row=0, column=0, columnspan=2)
 
 # Grid labels
 compound_name_label = Label(reagents_frame, padx=20, text="Compound Name")
-role_label = Label(reagents_frame, text="Role")
 mr_label = Label(reagents_frame, text= "Mr /g mol\N{SUPERSCRIPT MINUS}\N{SUPERSCRIPT ONE}")
-density_label = Label(reagents_frame, text="Density /g mL\N{SUPERSCRIPT MINUS}\N{SUPERSCRIPT ONE}")
 phase_label = Label(reagents_frame, text="Phase")
+role_label = Label(reagents_frame, text="Role")
 
-lit_mass_label = Label(reagents_frame, text="lit. Mass /g\n(precalculated %wt)")
-lit_vol_label = Label(reagents_frame, text="lit. Vol /mL")
-lit_conc_label = Label(reagents_frame, text="Concentration /M")
+lit_mass_label = Label(reagents_frame, text="lit. Mass /g\n(precalculated wt.%)")
 lit_mol_label = Label(reagents_frame, text="lit. Mols")
+lit_vol_label = Label(reagents_frame, text="lit. Vol /mL")
+lit_conc_label = Label(reagents_frame, text="Concentration /M\n(or wt.%)")
+density_label = Label(reagents_frame, text="Density /g mL\N{SUPERSCRIPT MINUS}\N{SUPERSCRIPT ONE}")
 
 
 # Grid label placement
 compound_name_label.grid(row=0, column=1)
-role_label.grid(row=0, column=2)
-mr_label.grid(row=0, column=3)
-density_label.grid(row=0, column=4)
-phase_label.grid(row=0, column=5)
+mr_label.grid(row=0, column=2)
+phase_label.grid(row=0, column=3)
+role_label.grid(row=0, column=4)
 
-lit_mass_label.grid(row=0, column=6)
+lit_mass_label.grid(row=0, column=5)
+lit_mol_label.grid(row=0, column=6)
 lit_vol_label.grid(row=0, column=7)
 lit_conc_label.grid(row=0, column=8)
-lit_mol_label.grid(row=0, column=9)
+density_label.grid(row=0, column=9)
 
 
 
@@ -48,7 +48,7 @@ class Compound:
 
     # Drop down menu config
     role_options = [
-    "Reagent",
+    "Reactant",
     "Solvent",
     "Catalyst",
     ]
@@ -57,6 +57,7 @@ class Compound:
     "Solid",
     "Liquid",
     "Solution",
+    "Solution (wt.%)"
     ]
 
     # Class variables for layout
@@ -84,28 +85,29 @@ class Compound:
 
         # Set up entry fields
         self.name_entry = Entry(reagents_frame, width=Compound.compound_name_width)
-        self.role_entry = ttk.Combobox(reagents_frame, values=Compound.role_options, justify='center', state='readonly')
-        self.role_entry.set("Select Role")
         self.mr_entry = Entry(reagents_frame, width=Compound.field_width, justify='center')
-        self.density_entry = Entry(reagents_frame, width=Compound.field_width, justify='center')
         self.phase_entry = ttk.Combobox(reagents_frame, values=Compound.phase_options, justify='center', state='readonly')
         self.phase_entry.set("Select Phase")
+        self.role_entry = ttk.Combobox(reagents_frame, values=Compound.role_options, justify='center', state='readonly')
+        self.role_entry.set("Select Role")
+
         self.lit_mass_entry = Entry(reagents_frame, width=Compound.field_width, justify='center')
+        self.lit_mol_entry = Entry(reagents_frame, width=Compound.field_width, justify='center')
         self.lit_vol_entry = Entry(reagents_frame, width=Compound.field_width, justify='center')
         self.lit_conc_entry = Entry(reagents_frame, width=Compound.field_width, justify='center')
-        self.lit_mol_entry = Entry(reagents_frame, width=Compound.field_width, justify='center')
+        self.density_entry = Entry(reagents_frame, width=Compound.field_width, justify='center')
 
         # storing property entries in dictionary so they can be easily removed
         # when required
         self.properties_entry = {"name" : self.name_entry,
-                                "role" : self.role_entry,
                                 "mr" : self.mr_entry,
-                                "density" : self.density_entry,
                                 "phase" : self.phase_entry,
+                                "role" : self.role_entry,
                                 "lit_mass" : self.lit_mass_entry,
+                                "lit_mol" : self.lit_mol_entry,
                                 "lit_vol" : self.lit_vol_entry,
                                 "lit_conc" : self.lit_conc_entry,
-                                "lit_mol" : self.lit_mol_entry,
+                                "density" : self.density_entry,
                                 }
 
 
@@ -116,14 +118,14 @@ class Compound:
             ## updates position of fields and buttons
             # Entry field positions
             self.name_entry.grid(row=Compound.compound_list.index(self)+1, column=1)
-            self.role_entry.grid(row=Compound.compound_list.index(self)+1, column=2)
-            self.mr_entry.grid(row=Compound.compound_list.index(self)+1, column=3)
-            self.density_entry.grid(row=Compound.compound_list.index(self)+1, column=4)
-            self.phase_entry.grid(row=Compound.compound_list.index(self)+1, column=5)
-            self.lit_mass_entry.grid(row=Compound.compound_list.index(self)+1, column=6)
+            self.mr_entry.grid(row=Compound.compound_list.index(self)+1, column=2)
+            self.phase_entry.grid(row=Compound.compound_list.index(self)+1, column=3)
+            self.role_entry.grid(row=Compound.compound_list.index(self)+1, column=4)
+            self.lit_mass_entry.grid(row=Compound.compound_list.index(self)+1, column=5)
+            self.lit_mol_entry.grid(row=Compound.compound_list.index(self)+1, column=6)
             self.lit_vol_entry.grid(row=Compound.compound_list.index(self)+1, column=7)
             self.lit_conc_entry.grid(row=Compound.compound_list.index(self)+1, column=8)
-            self.lit_mol_entry.grid(row=Compound.compound_list.index(self)+1, column=9)
+            self.density_entry.grid(row=Compound.compound_list.index(self)+1, column=9)
 
             # Position 'remove compound' button
             self.remove_compound_button.grid(row=Compound.compound_list.index(self)+1, column = 0)
@@ -221,6 +223,9 @@ target_product_lit_yield_entry.grid(row=1, column=4)
 # Calculate button will set the input attributes of each compound and the target
 # product
 
+# TODO: Do not let calculator submission without all name, role, mr and phase
+# entries
+
 # Calculate button function
 def calculate():
     # Creating empty list to store compound property dictionaries
@@ -274,7 +279,8 @@ def calculate():
 
     # Passing input data to calculator class.
     calculator = Calculator(compound_properties_list, target_properties)
-    print(calculator.table)
+    print(f"React table:\n{calculator.react_table}\n")
+    print(f"Target table:\n{calculator.target_table}\n")
 
     # TODO: Create Calculator class to set up dataframe and perform conditional
     # calculations
