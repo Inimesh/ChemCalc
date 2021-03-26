@@ -37,13 +37,11 @@ class Calculator():
         # # a problem
         self.react_col_list = self.react_table.columns.tolist()
         self.target_col_list = self.target_table.columns.tolist()
-
-        self.react_data_type_list = [str, str, float, float, str, float, float, float, float]
-        self.target_data_type_list = [str, float, str, float, float]
+        self.react_data_type_list = [str, float, str, str, float, float, float, float, float]
+        self.target_data_type_list = [str, float, str, float, float, float]
 
         self.react_convert_dict = dict(zip(self.react_col_list, self.react_data_type_list))
         self.target_convert_dict = dict(zip(self.target_col_list, self.target_data_type_list))
-
         self.react_table = self.react_table.astype(self.react_convert_dict)
         self.target_table = self.target_table.astype(self.target_convert_dict)
 
@@ -62,50 +60,6 @@ class Calculator():
 
         # Calculate method is run to generate results
         self.calculate()
-
-    def complete_react_table(self):
-        ''' Wrapper method that runs helper functions in dependency order;
-            assuming the number of mols is known for each reactant.'''
-
-        self.calculate_lit_mass()
-        self.calculate_lit_vol()
-        self.calculate_lit_mol()
-
-
-    def calculate(self):
-        # Step 1: Calculating key information
-        # Target mass and mol accounting for literature product yield
-        self.target_mass = self.target_table['desired_mass'] / (self.target_table['lit_yield'] / 100)
-        self.target_mol = self.target_mass / self.target_table['mr']
-
-        # finding lowest quantity reactant name(s) and thier number of mols as a list and value resp.
-        self.reactants = self.react_table.loc[self.react_table['role'] == 'Reactant']
-        self.smallest_num_mol = self.reactants['calc_lit_mol'].min()
-
-        self.lowest_quantity_reactant_data = self.reactants.loc[self.reactants['calc_lit_mol'] == self.smallest_num_mol]
-        self.lowest_quantity_reactant_names = self.lowest_quantity_reactant_data['name'].tolist()
-
-        # Step 2: Generating dataframe to store display results
-        self.display_results = pd.DataFrame(index=self.react_table.index.tolist(),
-                                            columns=['molar_ratio', 'mols', 'mass', 'vol'])
-
-        # Fill display data
-        self.display_results['molar_ratio'] = self.react_table['calc_lit_mol'] / self.smallest_num_mol
-
-        # NOTE: Need to make a 'lit. product amount' entry in UI and target table
-        # to calculate scaling factor for display result reagent amounts
-
-        # NOTE: Could also put in stoichimetric ratios as an optional input,
-        # from which we can determine the limiting reagent.
-
-        print(self.display_results)
-
-
-
-
-
-
-
 
     ## ----------------------- Helper functions -----------------------------##
 
@@ -128,32 +82,105 @@ class Calculator():
         self.react_table['calc_lit_mass'] = np.select(conditions, results)
 
     def calculate_lit_vol(self):
-        ''' This assumes that the number of mols is always known. '''
-        conditions = [
-        (pd.notna(self.react_table['lit_vol'])), # Volume already supplied
-        (pd.isna(self.react_table['lit_vol']) & pd.notna(self.react_table['density']) & pd.notna(self.react_table['calc_lit_mass'])),
-        ]
+            ''' This assumes that the number of mols is always known. '''
+            conditions = [
+            (pd.notna(self.react_table['lit_vol'])), # Volume already supplied
+            (pd.isna(self.react_table['lit_vol']) & pd.notna(self.react_table['density']) & pd.notna(self.react_table['calc_lit_mass'])),
+            ]
 
-        results = [
-        (self.react_table['lit_vol']), # Volume already supplied
-        (self.react_table['calc_lit_mass'] / self.react_table['density']), # Calculateing from mass / density
-        ]
+            results = [
+            (self.react_table['lit_vol']), # Volume already supplied
+            (self.react_table['calc_lit_mass'] / self.react_table['density']), # Calculateing from mass / density
+            ]
 
-        self.react_table['calc_lit_vol'] = np.select(conditions, results)
+            self.react_table['calc_lit_vol'] = np.select(conditions, results)
 
     def calculate_lit_mol(self):
-        ''' This assumes that the number of mols is always known. '''
-        conditions = [
-        (pd.notna(self.react_table['lit_mol'])), # Mols already supplied
-        ]
+                ''' This assumes that the number of mols is always known. '''
+                conditions = [
+                (pd.notna(self.react_table['lit_mol'])), # Mols already supplied
+                ]
 
-        results = [
-        (self.react_table['lit_mol']), # Mols already supplied
-        ]
+                results = [
+                (self.react_table['lit_mol']), # Mols already supplied
+                ]
 
-        self.react_table['calc_lit_mol'] = np.select(conditions, results)
+                self.react_table['calc_lit_mol'] = np.select(conditions, results)
 
     ## ----------------------- Helper functions end -------------------------##
+
+    def complete_react_table(self):
+        ''' Wrapper method that runs helper functions in dependency order;
+            assuming the number of mols is known for each reactant.'''
+
+        self.calculate_lit_mass()
+        self.calculate_lit_vol()
+        self.calculate_lit_mol()
+
+        print(f"React table:\n{self.react_table}\n")
+        print(f"Target table:\n{self.target_table}\n")
+
+    def calculate(self):
+        ''' Method to calculate display data '''
+
+        # Step 1: Calculating key information
+        # Target mass and mol accounting for literature product yield
+        self.target_mass = self.target_table['desired_mass'] / (self.target_table['lit_yield'] / 100) # column = column / column
+        self.target_mol = self.target_mass / self.target_table['mr'] # column = column / column
+
+        # Calculating scale factor for reactants
+        self.scale_factor = self.target_mol / self.target_table['lit_mol'] # column = column / column
+        self.scale_factor = self.scale_factor.iloc[0] # column -> value
+
+        # finding lowest quantity reactant name(s) and thier number of mols as a list and value resp.
+        self.reactants = self.react_table.loc[self.react_table['role'] == 'Reactant'] # column
+        self.smallest_num_mol = self.reactants['calc_lit_mol'].min() # value
+
+        # NOTE: These quantities below are calculated for a 'identify limiting reagent' feature,
+        # potentially to be implemented later.
+        self.lowest_quantity_reactant_data = self.reactants.loc[self.reactants['calc_lit_mol'] == self.smallest_num_mol]
+        self.lowest_quantity_reactant_names = self.lowest_quantity_reactant_data['name'].tolist()
+
+
+
+
+        # Step 2: Storing product display data stright into a dictionary to be returned to the UI
+        # RETURNED DATA TO UI
+        self.product_display_results_dict = {'target_mass' : self.target_mass.iloc[0], # column -> value
+                                        'target_mol' : self.target_mol.iloc[0]} # column -> value
+
+
+
+        
+
+        # Step 3: Generating dataframe to store reactant display results first before we return it
+        # to the UI as a dictionary
+        self.reactant_display_results = pd.DataFrame(index=self.react_table.index.tolist(),
+                                            columns=['molar_ratio', 'mols', 'mass', 'vol'])
+
+        # Fill reactant display dataframe
+        self.reactant_display_results['molar_ratio'] = self.react_table['calc_lit_mol'] / self.smallest_num_mol
+        self.reactant_display_results['mols'] = self.react_table['calc_lit_mol'] * self.scale_factor
+        self.reactant_display_results['mass'] = self.react_table['calc_lit_mass'] * self.scale_factor
+        self.reactant_display_results['vol'] = self.react_table['calc_lit_vol'] * self.scale_factor
+
+        # Convert reactant display dataframe to dictionary
+        # RETURNED DATA TO UI
+        self.reactant_display_results_dict = self.reactant_display_results.to_dict()
+
+        # NOTE: Could also put in stoichimetric ratios as an optional input,
+        # from which we can determine the limiting reagent.
+
+        print(self.reactant_display_results_dict)
+        print(self.product_display_results_dict)
+
+
+
+
+
+
+
+
 
 
 

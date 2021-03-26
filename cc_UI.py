@@ -179,7 +179,6 @@ spacer.grid(sticky="W", row=3, column=0)
 
 ##--------------- Target compound frame -------------------------------------##
 
-# TODO: Configure the target compound frame
 target_frame = LabelFrame(root, text="Target Compound")
 target_frame.grid(sticky='W', row=4, column=0)
 
@@ -187,16 +186,17 @@ target_frame.grid(sticky='W', row=4, column=0)
 target_compound_name_label = Label(target_frame, padx=20, text="Product Name")
 target_mr_label = Label(target_frame, text= "Mr /g mol\N{SUPERSCRIPT MINUS}\N{SUPERSCRIPT ONE}")
 target_phase_label = Label(target_frame, text="Phase")
-target_desired_mass_label = Label(target_frame, text="Desired mass /g")
+target_lit_mol_label = Label(target_frame, text="lit. mols of product\n/mol")
 target_product_lit_yield_label = Label(target_frame, text="lit. yield /%")
-
+target_desired_mass_label = Label(target_frame, text="Desired mass /g")
 
 # Input labels positioning
 target_compound_name_label.grid(row=0, column=0)
 target_mr_label.grid(row=0, column=1)
 target_phase_label.grid(row=0, column=2)
-target_desired_mass_label.grid(row=0, column=3)
+target_lit_mol_label.grid(row=0, column = 3)
 target_product_lit_yield_label.grid(row=0, column=4)
+target_desired_mass_label.grid(row=0, column=5)
 
 
 # Input entry fields
@@ -204,15 +204,17 @@ target_compound_name_entry = Entry(target_frame, width=Compound.compound_name_wi
 target_mr_entry = Entry(target_frame, width=Compound.field_width, justify='center')
 target_phase_entry = ttk.Combobox(target_frame, values=Compound.phase_options, justify='center', state='readonly')
 target_phase_entry.set("Select Phase")
-target_desired_mass_entry = Entry(target_frame, width=Compound.field_width, justify='center')
+target_lit_mol_entry = Entry(target_frame, width=Compound.field_width, justify='center')
 target_product_lit_yield_entry = Entry(target_frame, width=Compound.field_width, justify='center')
+target_desired_mass_entry = Entry(target_frame, width=Compound.field_width, justify='center')
 
 # Input entry fields positioning
 target_compound_name_entry.grid(row=1, column=0)
 target_mr_entry.grid(row=1, column=1)
 target_phase_entry.grid(row=1, column=2)
-target_desired_mass_entry.grid(row=1, column=3)
+target_lit_mol_entry.grid(row=1, column=3)
 target_product_lit_yield_entry.grid(row=1, column=4)
+target_desired_mass_entry.grid(row=1, column=5)
 
 
 
@@ -234,30 +236,30 @@ def calculate():
     for compound in Compound.compound_list:
         compound.name = compound.properties_entry["name"].get()
         compound.mr = compound.properties_entry["mr"].get()
-        if compound.properties_entry["role"].get() == 'Select Role':
-            compound.role = ''
-        else:
-            compound.role = compound.properties_entry["role"].get()
-        compound.density = compound.properties_entry["density"].get()
         if compound.properties_entry["phase"].get() == 'Select Phase':
             compound.phase = ''
         else:
             compound.phase = compound.properties_entry["phase"].get()
+        if compound.properties_entry["role"].get() == 'Select Role':
+            compound.role = ''
+        else:
+            compound.role = compound.properties_entry["role"].get()
         compound.lit_mass = compound.properties_entry["lit_mass"].get()
+        compound.lit_mol = compound.properties_entry["lit_mol"].get()
         compound.lit_vol = compound.properties_entry["lit_vol"].get()
         compound.lit_conc = compound.properties_entry["lit_conc"].get()
-        compound.lit_mol = compound.properties_entry["lit_mol"].get()
+        compound.density = compound.properties_entry["density"].get()
 
         # Storing compound properites in a dictionary for easy access
         compound.properties = {"name" : compound.name,
-                                "role" : compound.role,
                                 "mr" : compound.mr,
-                                "density" : compound.density,
                                 "phase" : compound.phase,
+                                "role" : compound.role,
                                 "lit_mass" : compound.lit_mass,
+                                "lit_mol" : compound.lit_mol,
                                 "lit_vol" : compound.lit_vol,
                                 "lit_conc" : compound.lit_conc,
-                                "lit_mol" : compound.lit_mol,
+                                "density" : compound.density,
                                 }
 
         # Storing dictionaries in a list to be passed to calculator
@@ -268,23 +270,21 @@ def calculate():
     target_properties = {"name" : target_compound_name_entry.get(),
                             "mr" : target_mr_entry.get(),
                             "phase" : target_phase_entry.get(),
-                            "desired_mass" : target_desired_mass_entry.get(),
+                            "lit_mol" : target_lit_mol_entry.get(),
                             "lit_yield" : target_product_lit_yield_entry.get(),
+                            "desired_mass" : target_desired_mass_entry.get(),
                             }
 
     # Debugging print statements
-    # for compound in Compound.compound_list:
-    #     print(compound.properties)
-    # print(target_properties)
+
 
     # Passing input data to calculator class.
     calculator = Calculator(compound_properties_list, target_properties)
-    print(f"React table:\n{calculator.react_table}\n")
-    print(f"Target table:\n{calculator.target_table}\n")
 
-    # TODO: Create Calculator class to set up dataframe and perform conditional
-    # calculations
-    # results = Calculator(Compound.compound_list, target_properties):
+    # Reactant display data retrieved as a dictionary of dictionaries
+    reactant_display_results_dict = calculator.reactant_display_results_dict
+    # Product display data retrieved as a dictionary
+    product_display_results_dict = calculator.product_display_results_dict
 
 ##--------------- Calculate button ------------------------------------------##
 
@@ -306,15 +306,15 @@ calculate_button.grid(sticky='W', row=4, column=1)
 target_mass_lit_yield_label = Label(target_frame, text="Target mass\n(accounting for lit. yield) /g")
 target_mol_label = Label(target_frame, text="Target mol")
 # Output labels positioning
-target_mass_lit_yield_label.grid(row=0, column=5)
-target_mol_label.grid(row=0, column=6)
+target_mass_lit_yield_label.grid(row=0, column=6)
+target_mol_label.grid(row=0, column=7)
 
 # Output text
 target_mass_lit_yield = Label(target_frame, padx=73, text="", borderwidth=2, relief='solid')
 target_mol_label = Label(target_frame, padx=73, text="", borderwidth=2, relief='solid')
 # Output text positioning
-target_mass_lit_yield.grid(row=1, column=5)
-target_mol_label.grid(row=1, column=6)
+target_mass_lit_yield.grid(row=1, column=6)
+target_mol_label.grid(row=1, column=7)
 
 ##--------------- Initialisation --------------------------------------------##
 start_compound = Compound()
