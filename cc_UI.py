@@ -18,10 +18,10 @@ mr_label = Label(reagents_frame, text= "Mr /g mol\N{SUPERSCRIPT MINUS}\N{SUPERSC
 phase_label = Label(reagents_frame, text="Phase")
 role_label = Label(reagents_frame, text="Role")
 
-lit_mass_label = Label(reagents_frame, text="lit. Mass /g\n(precalculated wt.%)")
+lit_mass_label = Label(reagents_frame, text="lit. Mass /g")
 lit_mol_label = Label(reagents_frame, text="lit. Mols")
 lit_vol_label = Label(reagents_frame, text="lit. Vol /mL")
-lit_conc_label = Label(reagents_frame, text="Concentration /M\n(or wt.%)")
+lit_conc_label = Label(reagents_frame, text="Concentration\n/M (or wt.%)")
 density_label = Label(reagents_frame, text="Density /g mL\N{SUPERSCRIPT MINUS}\N{SUPERSCRIPT ONE}")
 
 
@@ -61,7 +61,7 @@ class Compound:
     ]
 
     # Class variables for layout
-    field_width = 18
+    field_width = 15
     compound_name_width = 30
 
     # Class methods
@@ -186,7 +186,7 @@ target_frame.grid(sticky='W', row=4, column=0)
 target_compound_name_label = Label(target_frame, padx=20, text="Product Name")
 target_mr_label = Label(target_frame, text= "Mr /g mol\N{SUPERSCRIPT MINUS}\N{SUPERSCRIPT ONE}")
 target_phase_label = Label(target_frame, text="Phase")
-target_lit_mol_label = Label(target_frame, text="lit. mols of product\n/mol")
+target_lit_mol_label = Label(target_frame, text="lit. mols of\nproduct /mol")
 target_product_lit_yield_label = Label(target_frame, text="lit. yield /%")
 target_desired_mass_label = Label(target_frame, text="Desired mass /g")
 
@@ -275,16 +275,47 @@ def calculate():
                             "desired_mass" : target_desired_mass_entry.get(),
                             }
 
-    # Debugging print statements
-
-
     # Passing input data to calculator class.
     calculator = Calculator(compound_properties_list, target_properties)
-
     # Reactant display data retrieved as a dictionary of dictionaries
     reactant_display_results_dict = calculator.reactant_display_results_dict
     # Product display data retrieved as a dictionary
     product_display_results_dict = calculator.product_display_results_dict
+
+    ##--------------------- Displaying the results --------------------------##
+    # Displaying reactant results
+    reactant_display_frame = LabelFrame(root, text="Results")
+    reactant_display_frame.grid(row=0, column=2)
+
+    result_molar_ratio_label = Label(reactant_display_frame, text="molar ratio\n")
+    result_mols_label = Label(reactant_display_frame, text="mols\n")
+    result_mass_label = Label(reactant_display_frame, text="mass\n")
+    result_vol_label = Label(reactant_display_frame, text="vol\n")
+
+    result_molar_ratio_label.grid(row=0, column=0)
+    result_mols_label.grid(row=0, column=1)
+    result_mass_label.grid(row=0, column=2)
+    result_vol_label.grid(row=0, column=3)
+
+    for index, value in enumerate(Compound.compound_list):
+        # Looping through each compound in the compound list to get the index of each
+        result_molar_ratio = Label(reactant_display_frame, text=reactant_display_results_dict['molar_ratio'][index])
+        result_mols = Label(reactant_display_frame, text=reactant_display_results_dict['mols'][index])
+        result_mass = Label(reactant_display_frame, text=reactant_display_results_dict['mass'][index])
+        result_vol = Label(reactant_display_frame, text=reactant_display_results_dict['vol'][index])
+
+        result_molar_ratio.grid(row=index+1, column=0)
+        result_mols.grid(row=index+1, column=1)
+        result_mass.grid(row=index+1, column=2)
+        result_vol.grid(row=index+1, column=3)
+
+
+    # Displaying product window results
+    target_mass['text'] = product_display_results_dict['target_mass']
+    target_mol['text'] = product_display_results_dict['target_mol']
+
+
+
 
 ##--------------- Calculate button ------------------------------------------##
 
@@ -303,18 +334,18 @@ calculate_button.grid(sticky='W', row=4, column=1)
 
 ## Target compound frame
 # Output labels
-target_mass_lit_yield_label = Label(target_frame, text="Target mass\n(accounting for lit. yield) /g")
+target_mass_label = Label(target_frame, text="Target mass\n(accounting for lit. yield) /g")
 target_mol_label = Label(target_frame, text="Target mol")
 # Output labels positioning
-target_mass_lit_yield_label.grid(row=0, column=6)
+target_mass_label.grid(row=0, column=6)
 target_mol_label.grid(row=0, column=7)
 
 # Output text
-target_mass_lit_yield = Label(target_frame, padx=73, text="", borderwidth=2, relief='solid')
-target_mol_label = Label(target_frame, padx=73, text="", borderwidth=2, relief='solid')
+target_mass = Label(target_frame, width=20, padx=3, text="", borderwidth=2, relief='solid')
+target_mol = Label(target_frame, width=20, padx=3, text="", borderwidth=2, relief='solid')
 # Output text positioning
-target_mass_lit_yield.grid(row=1, column=6)
-target_mol_label.grid(row=1, column=7)
+target_mass.grid(row=1, column=6)
+target_mol.grid(row=1, column=7)
 
 ##--------------- Initialisation --------------------------------------------##
 start_compound = Compound()
