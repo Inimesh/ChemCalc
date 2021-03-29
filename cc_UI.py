@@ -228,6 +228,7 @@ target_desired_mass_entry.grid(row=1, column=5)
 # TODO: Do not let calculator submission without all name, role, mr and phase
 # entries
 
+
 # Calculate button function
 def calculate():
     # Creating empty list to store compound property dictionaries
@@ -283,31 +284,43 @@ def calculate():
     product_display_results_dict = calculator.product_display_results_dict
 
     ##--------------------- Displaying the results --------------------------##
-    # Displaying reactant results
-    reactant_display_frame = LabelFrame(root, text="Results")
-    reactant_display_frame.grid(row=0, column=2)
+    # Displaying reactant results in a new window
 
-    result_molar_ratio_label = Label(reactant_display_frame, text="molar ratio\n")
-    result_mols_label = Label(reactant_display_frame, text="mols\n")
-    result_mass_label = Label(reactant_display_frame, text="mass\n")
-    result_vol_label = Label(reactant_display_frame, text="vol\n")
+    # Setting up new window
+    reactant_results_display_window = Tk()
+    reactant_results_display_window.title("ChemCalc Results")
 
-    result_molar_ratio_label.grid(row=0, column=0)
-    result_mols_label.grid(row=0, column=1)
-    result_mass_label.grid(row=0, column=2)
-    result_vol_label.grid(row=0, column=3)
+    # Creating frame in which to display results in new window
+    reactant_display_frame = LabelFrame(reactant_results_display_window, text="Results", height=reagents_frame.winfo_height())
+    reactant_display_frame.grid(row=0, column=0)
 
-    for index, value in enumerate(Compound.compound_list):
+    result_compound_name_label = Label(reactant_display_frame, text="Compound\nname")
+    result_molar_ratio_label = Label(reactant_display_frame, text="molar\nratio")
+    result_mols_label = Label(reactant_display_frame, text="mols")
+    result_mass_label = Label(reactant_display_frame, text="mass")
+    result_vol_label = Label(reactant_display_frame, text="vol")
+
+    result_compound_name_label.grid(row=0, column=0)
+    result_molar_ratio_label.grid(row=0, column=1)
+    result_mols_label.grid(row=0, column=2)
+    result_mass_label.grid(row=0, column=3)
+    result_vol_label.grid(row=0, column=4)
+
+    result_pady = 3
+
+    for index, compound in enumerate(Compound.compound_list):
         # Looping through each compound in the compound list to get the index of each
-        result_molar_ratio = Label(reactant_display_frame, text=reactant_display_results_dict['molar_ratio'][index])
-        result_mols = Label(reactant_display_frame, text=reactant_display_results_dict['mols'][index])
-        result_mass = Label(reactant_display_frame, text=reactant_display_results_dict['mass'][index])
-        result_vol = Label(reactant_display_frame, text=reactant_display_results_dict['vol'][index])
+        result_compound_name = Label(reactant_display_frame, text=compound.properties['name'], pady=result_pady)
+        result_molar_ratio = Label(reactant_display_frame, text=reactant_display_results_dict['molar_ratio'][index], pady=result_pady)
+        result_mols = Label(reactant_display_frame, text=reactant_display_results_dict['mols'][index], pady=result_pady)
+        result_mass = Label(reactant_display_frame, text=reactant_display_results_dict['mass'][index], pady=result_pady)
+        result_vol = Label(reactant_display_frame, text=reactant_display_results_dict['vol'][index], pady=result_pady)
 
-        result_molar_ratio.grid(row=index+1, column=0)
-        result_mols.grid(row=index+1, column=1)
-        result_mass.grid(row=index+1, column=2)
-        result_vol.grid(row=index+1, column=3)
+        result_compound_name.grid(row=index+1, column=0)
+        result_molar_ratio.grid(row=index+1, column=1)
+        result_mols.grid(row=index+1, column=2)
+        result_mass.grid(row=index+1, column=3)
+        result_vol.grid(row=index+1, column=4)
 
 
     # Displaying product window results
@@ -317,20 +330,19 @@ def calculate():
 
 
 
+
 ##--------------- Calculate button ------------------------------------------##
+
 
 # Calculate button declaration and position
 calculate_button = Button(root, text="Calculate", command=calculate)
 calculate_button.grid(sticky='W', row=4, column=1)
 
-##--------------- Render output ---------------------------------------------##
+##--------------- Target compound output init -------------------------------##
 
 # TODO: Create new window with display and save and print option?
 
 ### lAYOUT
-
-## Reagents frame
-# OUTPUT HERE
 
 ## Target compound frame
 # Output labels
