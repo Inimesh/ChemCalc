@@ -33,8 +33,6 @@ class Calculator():
 
         # Casting data frame colums to correct datatypes (strings and high
         # precision floats)
-        # # NOTE: string columns are casting to 'object' dtype but should not be
-        # # a problem
         self.react_col_list = self.react_table.columns.tolist()
         self.target_col_list = self.target_table.columns.tolist()
         self.react_data_type_list = [str, float, str, str, float, float, float, float, float]
@@ -44,7 +42,6 @@ class Calculator():
         self.target_convert_dict = dict(zip(self.target_col_list, self.target_data_type_list))
         self.react_table = self.react_table.astype(self.react_convert_dict)
         self.target_table = self.target_table.astype(self.target_convert_dict)
-
 
         # Adding 'calculated lit values' to the reactant table. This is to hold
         # quantities needed for further calculation but not supplied by the user
@@ -151,7 +148,7 @@ class Calculator():
 
 
 
-        
+
 
         # Step 3: Generating dataframe to store reactant display results first before we return it
         # to the UI as a dictionary

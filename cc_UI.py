@@ -306,15 +306,18 @@ def calculate():
     result_mass_label.grid(row=0, column=3)
     result_vol_label.grid(row=0, column=4)
 
+    # Display options
     result_pady = 3
+    result_precision = 5
 
     for index, compound in enumerate(Compound.compound_list):
         # Looping through each compound in the compound list to get the index of each
+        # and applying display options including dp precision.
         result_compound_name = Label(reactant_display_frame, text=compound.properties['name'], pady=result_pady)
-        result_molar_ratio = Label(reactant_display_frame, text=reactant_display_results_dict['molar_ratio'][index], pady=result_pady)
-        result_mols = Label(reactant_display_frame, text=reactant_display_results_dict['mols'][index], pady=result_pady)
-        result_mass = Label(reactant_display_frame, text=reactant_display_results_dict['mass'][index], pady=result_pady)
-        result_vol = Label(reactant_display_frame, text=reactant_display_results_dict['vol'][index], pady=result_pady)
+        result_molar_ratio = Label(reactant_display_frame, text=round(reactant_display_results_dict['molar_ratio'][index], result_precision), pady=result_pady)
+        result_mols = Label(reactant_display_frame, text=round(reactant_display_results_dict['mols'][index], result_precision), pady=result_pady)
+        result_mass = Label(reactant_display_frame, text=round(reactant_display_results_dict['mass'][index], result_precision), pady=result_pady)
+        result_vol = Label(reactant_display_frame, text=round(reactant_display_results_dict['vol'][index], result_precision), pady=result_pady)
 
         result_compound_name.grid(row=index+1, column=0)
         result_molar_ratio.grid(row=index+1, column=1)
@@ -324,8 +327,8 @@ def calculate():
 
 
     # Displaying product window results
-    target_mass['text'] = product_display_results_dict['target_mass']
-    target_mol['text'] = product_display_results_dict['target_mol']
+    target_mass['text'] = round(product_display_results_dict['target_mass'], result_precision)
+    target_mol['text'] = round(product_display_results_dict['target_mol'], result_precision)
 
 
 
