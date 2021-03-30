@@ -266,69 +266,94 @@ def calculate():
         # Storing dictionaries in a list to be passed to calculator
         compound_properties_list.append(compound.properties)
 
+    # Ensuring 'name', 'mr', 'pahse', and 'role' options are filled before
+    # calculation
+    valid = True
+    for prop in compound_properties_list:
+        if "" in (prop["name"], prop["mr"], prop["phase"], prop["role"]):
+            valid = False
+
     # Storing compound properites in a dictionary for easy accesss. Will be
     # passed to calculator.
-    target_properties = {"name" : target_compound_name_entry.get(),
-                            "mr" : target_mr_entry.get(),
-                            "phase" : target_phase_entry.get(),
-                            "lit_mol" : target_lit_mol_entry.get(),
-                            "lit_yield" : target_product_lit_yield_entry.get(),
-                            "desired_mass" : target_desired_mass_entry.get(),
-                            }
+    if valid:
+        target_properties = {"name" : target_compound_name_entry.get(),
+                                "mr" : target_mr_entry.get(),
+                                "phase" : target_phase_entry.get(),
+                                "lit_mol" : target_lit_mol_entry.get(),
+                                "lit_yield" : target_product_lit_yield_entry.get(),
+                                "desired_mass" : target_desired_mass_entry.get(),
+                                }
 
-    # Passing input data to calculator class.
-    calculator = Calculator(compound_properties_list, target_properties)
-    # Reactant display data retrieved as a dictionary of dictionaries
-    reactant_display_results_dict = calculator.reactant_display_results_dict
-    # Product display data retrieved as a dictionary
-    product_display_results_dict = calculator.product_display_results_dict
+        # Passing input data to calculator class.
+        calculator = Calculator(compound_properties_list, target_properties)
+        # Reactant display data retrieved as a dictionary of dictionaries
+        reactant_display_results_dict = calculator.reactant_display_results_dict
+        # Product display data retrieved as a dictionary
+        product_display_results_dict = calculator.product_display_results_dict
 
-    ##--------------------- Displaying the results --------------------------##
-    # Displaying reactant results in a new window
+        ##--------------------- Displaying the results --------------------------##
+        # Displaying reactant results in a new window
 
-    # Setting up new window
-    reactant_results_display_window = Tk()
-    reactant_results_display_window.title("ChemCalc Results")
+        # Setting up new window
+        reactant_results_display_window = Tk()
+        reactant_results_display_window.title("ChemCalc Results")
 
-    # Creating frame in which to display results in new window
-    reactant_display_frame = LabelFrame(reactant_results_display_window, text="Results", height=reagents_frame.winfo_height())
-    reactant_display_frame.grid(row=0, column=0)
+        # Creating frame in which to display results in new window
+        reactant_display_frame = LabelFrame(reactant_results_display_window, text="Results", height=reagents_frame.winfo_height())
+        reactant_display_frame.grid(row=0, column=0)
 
-    result_compound_name_label = Label(reactant_display_frame, text="Compound\nname")
-    result_molar_ratio_label = Label(reactant_display_frame, text="molar\nratio")
-    result_mols_label = Label(reactant_display_frame, text="mols")
-    result_mass_label = Label(reactant_display_frame, text="mass")
-    result_vol_label = Label(reactant_display_frame, text="vol")
+        result_compound_name_label = Label(reactant_display_frame, text="Compound\nname")
+        result_molar_ratio_label = Label(reactant_display_frame, text="molar\nratio")
+        result_mols_label = Label(reactant_display_frame, text="mols")
+        result_mass_label = Label(reactant_display_frame, text="mass")
+        result_vol_label = Label(reactant_display_frame, text="vol")
 
-    result_compound_name_label.grid(row=0, column=0)
-    result_molar_ratio_label.grid(row=0, column=1)
-    result_mols_label.grid(row=0, column=2)
-    result_mass_label.grid(row=0, column=3)
-    result_vol_label.grid(row=0, column=4)
+        result_compound_name_label.grid(row=0, column=0)
+        result_molar_ratio_label.grid(row=0, column=1)
+        result_mols_label.grid(row=0, column=2)
+        result_mass_label.grid(row=0, column=3)
+        result_vol_label.grid(row=0, column=4)
 
-    # Display options
-    result_pady = 3
-    result_precision = 5
+        # Display options
+        result_pady = 3
+        result_precision = 5
 
-    for index, compound in enumerate(Compound.compound_list):
-        # Looping through each compound in the compound list to get the index of each
-        # and applying display options including dp precision.
-        result_compound_name = Label(reactant_display_frame, text=compound.properties['name'], pady=result_pady)
-        result_molar_ratio = Label(reactant_display_frame, text=round(reactant_display_results_dict['molar_ratio'][index], result_precision), pady=result_pady)
-        result_mols = Label(reactant_display_frame, text=round(reactant_display_results_dict['mols'][index], result_precision), pady=result_pady)
-        result_mass = Label(reactant_display_frame, text=round(reactant_display_results_dict['mass'][index], result_precision), pady=result_pady)
-        result_vol = Label(reactant_display_frame, text=round(reactant_display_results_dict['vol'][index], result_precision), pady=result_pady)
+        for index, compound in enumerate(Compound.compound_list):
+            # Looping through each compound in the compound list to get the index of each
+            # and applying display options including dp precision.
+            result_compound_name = Label(reactant_display_frame, text=compound.properties['name'], pady=result_pady)
+            result_molar_ratio = Label(reactant_display_frame, text=round(reactant_display_results_dict['molar_ratio'][index], result_precision), pady=result_pady)
+            result_mols = Label(reactant_display_frame, text=round(reactant_display_results_dict['mols'][index], result_precision), pady=result_pady)
+            result_mass = Label(reactant_display_frame, text=round(reactant_display_results_dict['mass'][index], result_precision), pady=result_pady)
+            result_vol = Label(reactant_display_frame, text=round(reactant_display_results_dict['vol'][index], result_precision), pady=result_pady)
 
-        result_compound_name.grid(row=index+1, column=0)
-        result_molar_ratio.grid(row=index+1, column=1)
-        result_mols.grid(row=index+1, column=2)
-        result_mass.grid(row=index+1, column=3)
-        result_vol.grid(row=index+1, column=4)
+            result_compound_name.grid(row=index+1, column=0)
+            result_molar_ratio.grid(row=index+1, column=1)
+            result_mols.grid(row=index+1, column=2)
+            result_mass.grid(row=index+1, column=3)
+            result_vol.grid(row=index+1, column=4)
 
 
-    # Displaying product window results
-    target_mass['text'] = round(product_display_results_dict['target_mass'], result_precision)
-    target_mol['text'] = round(product_display_results_dict['target_mol'], result_precision)
+        # Displaying product window results
+        target_mass['text'] = round(product_display_results_dict['target_mass'], result_precision)
+        target_mol['text'] = round(product_display_results_dict['target_mol'], result_precision)
+
+    # If key input information is not supplied, a window will appear and the
+    # calculation will not proceed.
+    else:
+        def okay_close_button_func():
+            missing_input_window.destroy()
+        missing_input_window = Tk()
+        missing_input_window.title("Missing input")
+
+        missing_input_text = Label(missing_input_window,
+                            relief='solid',
+                            text="Please ensure valid inputs are supplied for\n'Compound Name', 'Mr', 'Phase' and 'Role' options\nfor each compound")
+        missing_input_text_okay_button = Button(missing_input_window, text='Okay', command=okay_close_button_func)
+
+        missing_input_text.grid(row=0)
+        spacer = Label(missing_input_window).grid(row=1)
+        missing_input_text_okay_button.grid(row=2)
 
 
 
