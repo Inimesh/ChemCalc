@@ -36,7 +36,7 @@ class Calculator():
         self.react_col_list = self.react_table.columns.tolist()
         self.target_col_list = self.target_table.columns.tolist()
         self.react_data_type_list = [str, float, str, str, float, float, float, float, float]
-        self.target_data_type_list = [str, float, str, float, float, float, str]
+        self.target_data_type_list = [str, float, float, float, float, str]
 
         self.react_convert_dict = dict(zip(self.react_col_list, self.react_data_type_list))
         self.target_convert_dict = dict(zip(self.target_col_list, self.target_data_type_list))

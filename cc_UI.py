@@ -185,7 +185,6 @@ target_frame.grid(sticky='W', row=4, column=0)
 # Input labels
 target_compound_name_label = Label(target_frame, padx=20, text="Product Name")
 target_mr_label = Label(target_frame, text= "Mr /g mol\N{SUPERSCRIPT MINUS}\N{SUPERSCRIPT ONE}")
-target_phase_label = Label(target_frame, text="Phase")
 target_lit_mol_label = Label(target_frame, text="lit. mols of\nproduct /mol")
 target_product_lit_yield_label = Label(target_frame, text="lit. yield /%")
 desired_quantity_options = ["Desired mols", "Desired mass /g"]
@@ -195,17 +194,14 @@ target_desired_quantity_label.set("Desired quantity")
 # Input labels positioning
 target_compound_name_label.grid(row=0, column=0)
 target_mr_label.grid(row=0, column=1)
-target_phase_label.grid(row=0, column=2)
-target_lit_mol_label.grid(row=0, column = 3)
-target_product_lit_yield_label.grid(row=0, column=4)
-target_desired_quantity_label.grid(row=0, column=5)
+target_lit_mol_label.grid(row=0, column = 2)
+target_product_lit_yield_label.grid(row=0, column=3)
+target_desired_quantity_label.grid(row=0, column=4)
 
 
 # Input entry fields
 target_compound_name_entry = Entry(target_frame, width=Compound.compound_name_width)
 target_mr_entry = Entry(target_frame, width=Compound.field_width, justify='center')
-target_phase_entry = ttk.Combobox(target_frame, values=Compound.phase_options, justify='center', state='readonly', width=Compound.field_width)
-target_phase_entry.set("Select Phase")
 target_lit_mol_entry = Entry(target_frame, width=Compound.field_width, justify='center')
 target_product_lit_yield_entry = Entry(target_frame, width=Compound.field_width, justify='center')
 target_desired_quantity_entry = Entry(target_frame, width=Compound.field_width+4, justify='center')
@@ -213,10 +209,9 @@ target_desired_quantity_entry = Entry(target_frame, width=Compound.field_width+4
 # Input entry fields positioning
 target_compound_name_entry.grid(row=1, column=0)
 target_mr_entry.grid(row=1, column=1)
-target_phase_entry.grid(row=1, column=2)
-target_lit_mol_entry.grid(row=1, column=3)
-target_product_lit_yield_entry.grid(row=1, column=4)
-target_desired_quantity_entry.grid(row=1, column=5)
+target_lit_mol_entry.grid(row=1, column=2)
+target_product_lit_yield_entry.grid(row=1, column=3)
+target_desired_quantity_entry.grid(row=1, column=4)
 
 
 
@@ -287,7 +282,6 @@ def calculate():
 
         target_properties = {"name" : target_compound_name_entry.get(),
                             "mr" : target_mr_entry.get(),
-                            "phase" : target_phase_entry.get(),
                             "lit_mol" : target_lit_mol_entry.get(),
                             "lit_yield" : target_product_lit_yield_entry.get(),
                             "desired_quantity" : target_desired_quantity_entry.get(),
@@ -319,8 +313,8 @@ def calculate():
         reactant_display_frame = LabelFrame(reactant_results_display_window, text="Results", height=reagents_frame.winfo_height())
         reactant_display_frame.grid(row=0, column=0)
 
-        result_compound_name_label = Label(reactant_display_frame, text="Compound\nname")
-        result_molar_ratio_label = Label(reactant_display_frame, text="molar\nratio")
+        result_compound_name_label = Label(reactant_display_frame, text="Compound name")
+        result_molar_ratio_label = Label(reactant_display_frame, text="molar ratio")
         result_mols_label = Label(reactant_display_frame, text="mols")
         result_mass_label = Label(reactant_display_frame, text="mass")
         result_vol_label = Label(reactant_display_frame, text="vol")
@@ -331,18 +325,18 @@ def calculate():
         result_mass_label.grid(row=0, column=3)
         result_vol_label.grid(row=0, column=4)
 
-        # Display options
-        result_pady = 3
+        # Compound results display options
+        compound_result_pady = 3
         result_precision = 5
 
         for index, compound in enumerate(Compound.compound_list):
             # Looping through each compound in the compound list to get the index of each
             # and applying display options including dp precision.
-            result_compound_name = Label(reactant_display_frame, text=compound.properties['name'], pady=result_pady)
-            result_molar_ratio = Label(reactant_display_frame, text=round(reactant_display_results_dict['molar_ratio'][index], result_precision), pady=result_pady)
-            result_mols = Label(reactant_display_frame, text=round(reactant_display_results_dict['mols'][index], result_precision), pady=result_pady)
-            result_mass = Label(reactant_display_frame, text=round(reactant_display_results_dict['mass'][index], result_precision), pady=result_pady)
-            result_vol = Label(reactant_display_frame, text=round(reactant_display_results_dict['vol'][index], result_precision), pady=result_pady)
+            result_compound_name = Label(reactant_display_frame, text=compound.properties['name'], pady=compound_result_pady)
+            result_molar_ratio = Label(reactant_display_frame, text=round(reactant_display_results_dict['molar_ratio'][index], result_precision), pady=compound_result_pady)
+            result_mols = Label(reactant_display_frame, text=round(reactant_display_results_dict['mols'][index], result_precision), pady=compound_result_pady)
+            result_mass = Label(reactant_display_frame, text=round(reactant_display_results_dict['mass'][index], result_precision), pady=compound_result_pady)
+            result_vol = Label(reactant_display_frame, text=round(reactant_display_results_dict['vol'][index], result_precision), pady=compound_result_pady)
 
             result_compound_name.grid(row=index+1, column=0)
             result_molar_ratio.grid(row=index+1, column=1)
