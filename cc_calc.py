@@ -60,49 +60,74 @@ class Calculator():
 
     ## ----------------------- Helper functions -----------------------------##
 
-    # For the initial version of this calculator it is assumed that the mols
-    # of each reactant are supplied by the user, as it is a necessary convention
-    # in official ACS Experimental section writing.
+    # For the initial version of this calculator, with regard to the order of
+    # precedence it is assumed that the mols are usually supplied, as it is a
+    # necessary convention in official ACS Experimental section writing.
+    # Some edge cases for when the mols are not supplied are taken care of.
+    # The for a solution wt.% the lit_mass is the mass of the solution used in
+    # the literature as input by the solution. However the calc_lit_mass is the
+    # mass of the reactant dissolved in a sol wt.%. Therefor the calc_lit_mass
+    # must be converted back to wieght of the solution when displayed to the
+    # user.
+
 
     def calculate_lit_mass(self):
         ''' This assumes that the number of mols is always known. '''
+
         conditions = [
-        (pd.notna(self.react_table['lit_mass'])), # Mass already supplied
-        (pd.isna(self.react_table['lit_mass'])), # Mass not supplied
+        ((self.react_table['phase']!='Solution (wt.%)') & (self.react_table['phase']!='Solution') & (pd.notna(self.react_table['lit_mass']))), # Mass already supplied and not sol wt.% [solid or liquid]
+        (pd.notna(self.react_table['lit_mol'])), # Mass not supplied, mols are [any]
+        ((self.react_table['phase']=='Liquid') & (pd.notna(self.react_table['lit_vol'])) & (pd.notna(self.react_table['density']))), # No Mass or mols supplied [liquid]
+        ((self.react_table['phase']=='Solution (wt.%)') & (pd.notna(self.react_table['lit_vol'])) & (pd.notna(self.react_table['density'])) & (pd.notna(self.react_table['lit_conc']))), # [sol wt.% with volume]
+        ((self.react_table['phase']=='Solution (wt.%)') & (pd.notna(self.react_table['lit_mass'])) & (pd.notna(self.react_table['lit_conc']))), # [sol wt.% with mass]
         ]
 
         results = [
         (self.react_table['lit_mass']), # Mass already supplied
-        (self.react_table['lit_mol'] * self.react_table['mr']) # Calculating from mol * mr
+        (self.react_table['lit_mol'] * self.react_table['mr']), # Calculating from mol * mr [solid or liquid]
+        (self.react_table['lit_vol'] * self.react_table['density']), # Calculating from volume and density [any]
+        (self.react_table['lit_vol'] * self.react_table['density'] * (self.react_table['lit_conc'] / 100)), # [sol wt.% with volume]
+        (self.react_table['lit_mass'] * (self.react_table['lit_conc'] / 100)), # [sol wt.% with mass]
         ]
 
         self.react_table['calc_lit_mass'] = np.select(conditions, results)
 
     def calculate_lit_vol(self):
-            ''' This assumes that the number of mols is always known. '''
-            conditions = [
-            (pd.notna(self.react_table['lit_vol'])), # Volume already supplied
-            (pd.isna(self.react_table['lit_vol']) & pd.notna(self.react_table['density']) & pd.notna(self.react_table['calc_lit_mass'])),
-            ]
+        ''' This assumes that the number of mols is always known. '''
+        conditions = [
+        (pd.notna(self.react_table['lit_vol'])), # Volume already supplied [any]
+        ((self.react_table['phase']=='Liquid') & (pd.notna(self.react_table['density'])) & (pd.notna(self.react_table['calc_lit_mass']))), # Volume not supplied [liquid]
+        ((self.react_table['phase']=='Solution') & (pd.notna(self.react_table['lit_mol'])) & (pd.notna(self.react_table['lit_conc']))), # mols and conc supplied [solution]
+        ((self.react_table['phase']=='Solution (wt.%)') & (pd.notna(self.react_table['calc_lit_mass'])) & (pd.notna(self.react_table['density'])) & (pd.notna(self.react_table['lit_conc']))), # mass and density and conc [sol wt.%]
+        ]
 
-            results = [
-            (self.react_table['lit_vol']), # Volume already supplied
-            (self.react_table['calc_lit_mass'] / self.react_table['density']), # Calculateing from mass / density
-            ]
+        results = [
+        (self.react_table['lit_vol']), # Volume already supplied [any]
+        (self.react_table['calc_lit_mass'] / self.react_table['density']), # Calculateing from mass / density [liquid]
+        (self.react_table['lit_mol'] / (self.react_table['lit_conc'] * 1000)), # Calculating from mol / concentration * 1000 (to get L -> mL) [solution]
+        (self.react_table['calc_lit_mass'] / self.react_table['lit_conc'] / self.react_table['density']), # [sol wt.%]
+        ]
 
-            self.react_table['calc_lit_vol'] = np.select(conditions, results)
+        self.react_table['calc_lit_vol'] = np.select(conditions, results)
 
     def calculate_lit_mol(self):
-                ''' This assumes that the number of mols is always known. '''
-                conditions = [
-                (pd.notna(self.react_table['lit_mol'])), # Mols already supplied
-                ]
+        ''' This assumes that the number of mols is likely always known.
+            Accounting for some cases where it is not.'''
+        conditions = [
+        (pd.notna(self.react_table['lit_mol'])), # Mols already supplied
+        ((pd.notna(self.react_table['calc_lit_mass'])) & (pd.notna(self.react_table['mr']))), # Mols not supplied (unlikely), mass already calculated [any]
+        ((pd.notna(self.react_table['calc_lit_vol'])) & (pd.notna(self.react_table['density']))), # vol and density supplied [liquid]
+        ((pd.notna(self.react_table['calc_lit_vol'])) & (pd.notna(self.react_table['lit_conc']))), # vol and molar supplied [solution]
+        ]
 
-                results = [
-                (self.react_table['lit_mol']), # Mols already supplied
-                ]
+        results = [
+        (self.react_table['lit_mol']), # Mols already supplied
+        (self.react_table['calc_lit_mass'] / self.react_table['mr']), # Calculating from mass / mr
+        (self.react_table['calc_lit_vol'] * self.react_table['density'] / self.react_table['mr']), # calculating from vol * density / mr
+        (self.react_table['calc_lit_vol'] * (self.react_table['lit_conc'] / 1000)), # Calculating from vol * conc (/1000 L -> mL)
+        ]
 
-                self.react_table['calc_lit_mol'] = np.select(conditions, results)
+        self.react_table['calc_lit_mol'] = np.select(conditions, results)
 
     ## ----------------------- Helper functions end -------------------------##
 
@@ -158,7 +183,18 @@ class Calculator():
         # Fill reactant display dataframe
         self.reactant_display_results['molar_ratio'] = self.react_table['calc_lit_mol'] / self.smallest_num_mol
         self.reactant_display_results['mols'] = self.react_table['calc_lit_mol'] * self.scale_factor
-        self.reactant_display_results['mass'] = self.react_table['calc_lit_mass'] * self.scale_factor
+
+        cond = [
+                (self.react_table['phase'] == 'Solution (wt.%)'), # It is sol wt.%
+                (self.react_table['phase'] != 'Solution (wt.%)'), # It is not sol wt.%
+                ]
+
+        res = [
+                (self.react_table['calc_lit_mass'] / (self.react_table['lit_conc'] / 100) * self.scale_factor), # converting mass of reactant in solution back to mass of whole sol
+                (self.react_table['calc_lit_mass'] * self.scale_factor),
+                ]
+        self.reactant_display_results['mass'] = np.select(cond, res)
+
         self.reactant_display_results['vol'] = self.react_table['calc_lit_vol'] * self.scale_factor
 
         # Convert reactant display dataframe to dictionary
