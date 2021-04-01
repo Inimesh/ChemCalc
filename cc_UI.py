@@ -86,9 +86,9 @@ class Compound:
         # Set up entry fields
         self.name_entry = Entry(reagents_frame, width=Compound.compound_name_width)
         self.mr_entry = Entry(reagents_frame, width=Compound.field_width, justify='center')
-        self.phase_entry = ttk.Combobox(reagents_frame, values=Compound.phase_options, justify='center', state='readonly')
+        self.phase_entry = ttk.Combobox(reagents_frame, values=Compound.phase_options, justify='center', state='readonly', width=Compound.field_width)
         self.phase_entry.set("Select Phase")
-        self.role_entry = ttk.Combobox(reagents_frame, values=Compound.role_options, justify='center', state='readonly')
+        self.role_entry = ttk.Combobox(reagents_frame, values=Compound.role_options, justify='center', state='readonly', width=Compound.field_width)
         self.role_entry.set("Select Role")
 
         self.lit_mass_entry = Entry(reagents_frame, width=Compound.field_width, justify='center')
@@ -188,7 +188,9 @@ target_mr_label = Label(target_frame, text= "Mr /g mol\N{SUPERSCRIPT MINUS}\N{SU
 target_phase_label = Label(target_frame, text="Phase")
 target_lit_mol_label = Label(target_frame, text="lit. mols of\nproduct /mol")
 target_product_lit_yield_label = Label(target_frame, text="lit. yield /%")
-target_desired_mass_label = Label(target_frame, text="Desired mass /g")
+desired_quantity_options = ["Desired mols", "Desired mass /g"]
+target_desired_quantity_label = ttk.Combobox(target_frame, values=desired_quantity_options , justify='center', state='readonly', width=Compound.field_width)
+target_desired_quantity_label.set("Desired quantity")
 
 # Input labels positioning
 target_compound_name_label.grid(row=0, column=0)
@@ -196,17 +198,17 @@ target_mr_label.grid(row=0, column=1)
 target_phase_label.grid(row=0, column=2)
 target_lit_mol_label.grid(row=0, column = 3)
 target_product_lit_yield_label.grid(row=0, column=4)
-target_desired_mass_label.grid(row=0, column=5)
+target_desired_quantity_label.grid(row=0, column=5)
 
 
 # Input entry fields
 target_compound_name_entry = Entry(target_frame, width=Compound.compound_name_width)
 target_mr_entry = Entry(target_frame, width=Compound.field_width, justify='center')
-target_phase_entry = ttk.Combobox(target_frame, values=Compound.phase_options, justify='center', state='readonly')
+target_phase_entry = ttk.Combobox(target_frame, values=Compound.phase_options, justify='center', state='readonly', width=Compound.field_width)
 target_phase_entry.set("Select Phase")
 target_lit_mol_entry = Entry(target_frame, width=Compound.field_width, justify='center')
 target_product_lit_yield_entry = Entry(target_frame, width=Compound.field_width, justify='center')
-target_desired_mass_entry = Entry(target_frame, width=Compound.field_width, justify='center')
+target_desired_quantity_entry = Entry(target_frame, width=Compound.field_width+4, justify='center')
 
 # Input entry fields positioning
 target_compound_name_entry.grid(row=1, column=0)
@@ -214,7 +216,7 @@ target_mr_entry.grid(row=1, column=1)
 target_phase_entry.grid(row=1, column=2)
 target_lit_mol_entry.grid(row=1, column=3)
 target_product_lit_yield_entry.grid(row=1, column=4)
-target_desired_mass_entry.grid(row=1, column=5)
+target_desired_quantity_entry.grid(row=1, column=5)
 
 
 
@@ -272,18 +274,33 @@ def calculate():
     for prop in compound_properties_list:
         if "" in (prop["name"], prop["mr"], prop["phase"], prop["role"]):
             valid = False
+            invalid_issue = "compound_issue"
 
     # Storing compound properites in a dictionary for easy accesss. Will be
     # passed to calculator.
     if valid:
-        target_properties = {"name" : target_compound_name_entry.get(),
-                                "mr" : target_mr_entry.get(),
-                                "phase" : target_phase_entry.get(),
-                                "lit_mol" : target_lit_mol_entry.get(),
-                                "lit_yield" : target_product_lit_yield_entry.get(),
-                                "desired_mass" : target_desired_mass_entry.get(),
-                                }
+        # Checking required input for target compound
+        if target_desired_quantity_label.get() == "Desired quantity":
+            target_desired_quantity_holder = ""
+        else:
+            target_desired_quantity_holder = target_desired_quantity_label.get()
 
+        target_properties = {"name" : target_compound_name_entry.get(),
+                            "mr" : target_mr_entry.get(),
+                            "phase" : target_phase_entry.get(),
+                            "lit_mol" : target_lit_mol_entry.get(),
+                            "lit_yield" : target_product_lit_yield_entry.get(),
+                            "desired_quantity" : target_desired_quantity_entry.get(),
+                            "desired_quantity_unit" : target_desired_quantity_holder,
+                            }
+
+        # Checking for all required input supplied in target product section
+        for prop in target_properties:
+            if target_properties[prop] == "":
+                valid = False
+                invalid_issue = "product_issue"
+
+    if valid:
         # Passing input data to calculator class.
         calculator = Calculator(compound_properties_list, target_properties)
         # Reactant display data retrieved as a dictionary of dictionaries
@@ -346,9 +363,12 @@ def calculate():
         missing_input_window = Tk()
         missing_input_window.title("Missing input")
 
-        missing_input_text = Label(missing_input_window,
-                            relief='solid',
-                            text="Please ensure valid inputs are supplied for\n'Compound Name', 'Mr', 'Phase' and 'Role' options\nfor each compound")
+        if invalid_issue == "compound_issue":
+            invalid_txt = "Please ensure valid inputs are supplied for\n'Compound Name', 'Mr', 'Phase' and 'Role' attributes\nfor each compound"
+        else:
+            invalid_txt = "Please ensure valid inputs are supplied for\nall input fields including the 'Desired quantity' option"
+
+        missing_input_text = Label(missing_input_window, relief='solid', text=invalid_txt)
         missing_input_text_okay_button = Button(missing_input_window, text='Okay', command=okay_close_button_func)
 
         missing_input_text.grid(row=0)

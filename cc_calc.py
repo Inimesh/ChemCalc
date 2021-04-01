@@ -21,8 +21,8 @@ class Calculator():
             self.target_properties = target_properties
 
         # Initialising the dataframes
-        self.react_table = pd.DataFrame(compound_properties_list)
-        self.target_table = pd.DataFrame([target_properties])
+        self.react_table = pd.DataFrame(self.compound_properties_list)
+        self.target_table = pd.DataFrame([self.target_properties])
 
         # Converting empty string values to 'NaN type' (Applies to all
         # reactant and target property entries for smoother error handling but
@@ -36,7 +36,7 @@ class Calculator():
         self.react_col_list = self.react_table.columns.tolist()
         self.target_col_list = self.target_table.columns.tolist()
         self.react_data_type_list = [str, float, str, str, float, float, float, float, float]
-        self.target_data_type_list = [str, float, str, float, float, float]
+        self.target_data_type_list = [str, float, str, float, float, float, str]
 
         self.react_convert_dict = dict(zip(self.react_col_list, self.react_data_type_list))
         self.target_convert_dict = dict(zip(self.target_col_list, self.target_data_type_list))
@@ -147,8 +147,13 @@ class Calculator():
 
         # Step 1: Calculating key information
         # Target mass and mol accounting for literature product yield
-        self.target_mass = self.target_table['desired_mass'] / (self.target_table['lit_yield'] / 100) # column = column / column
-        self.target_mol = self.target_mass / self.target_table['mr'] # column = column / column
+        if self.target_properties["desired_quantity_unit"] == "Desired mass /g":
+            self.target_mass = self.target_table['desired_quantity'] / (self.target_table['lit_yield'] / 100) # column = column / column
+            self.target_mol = self.target_mass / self.target_table['mr'] # column = column / column
+
+        elif self.target_properties["desired_quantity_unit"] == "Desired mols":
+            self.target_mol = self.target_table['desired_quantity'] / (self.target_table['lit_yield'] / 100) # column = column / column
+            self.target_mass = self.target_mol * self.target_table['mr'] # column = column / column
 
         # Calculating scale factor for reactants
         self.scale_factor = self.target_mol / self.target_table['lit_mol'] # column = column / column
