@@ -1,4 +1,4 @@
-# Chemcalc
+# ChemCalc
 
 DISCLAIMER:
 This was my first ever software project so the code is not clean, has no automated testing and does not adhere to OOP best practices.
