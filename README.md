@@ -14,6 +14,10 @@ Pandas and numpy libraries are used in the logic modules.
 I have future plans to connect it to an API to have autocomplete features when
 entering innate chemical properties (e.g. molecular mass, density etc.).
 
+## Screenshots
+
+![ChemcCalc screenshot](https://user-images.githubusercontent.com/72313368/155895691-5071840b-d484-42e2-b485-37a1505e7acb.png)
+
 ## Dependencies
 
 - Python3
@@ -29,6 +33,3 @@ entering innate chemical properties (e.g. molecular mass, density etc.).
 python3 cc_UI.py 
 ```
 
-## Screenshots
-
-![ChemcCalc screenshot](https://user-images.githubusercontent.com/72313368/155895691-5071840b-d484-42e2-b485-37a1505e7acb.png)
